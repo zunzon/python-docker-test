@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from bottle import Bottle, run, response
+from bottle import Bottle, run, response, request, post
 import docker
 import json
 
@@ -11,13 +11,15 @@ client = docker.from_env()
 def hello():
     return "Henlo"
 
-@app.route('/api/run/<image>')
-def start(image):
+@app.route('/api/run/', method='POST')
+def start():
+    image = request.POST.get('image','')
     container = client.containers.run(image, detach=True)
     return container.logs()
 
-@app.route('/api/stop/<container>')
-def stop(container):
+@app.route('/api/stop/', method='POST')
+def stop():
+    container = request.POST.get('container','')
     while True:
         try:
             client.containers.get(container)
@@ -45,8 +47,9 @@ def listContainers():
     return {'DockerContainers': containerList}
 
 
-@app.route('/api/remove/<container>')
-def remove(container):
+@app.route('/api/remove/', method='POST')
+def remove():
+    container = request.POST.get('container','')
     while True:
         try:
             client.containers.get(container)
